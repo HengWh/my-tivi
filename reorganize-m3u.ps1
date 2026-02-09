@@ -37,15 +37,17 @@ for ($i = 0; $i -lt $content.Count; $i++) {
         if ($attributes -match 'tvg-name="([^"]+)"') {
             $channelName = $matches[1]
             
+            # 跳过 CCTV5+ 频道
+            if ($channelName -eq 'CCTV5+') {
+                $i++ # 跳过下一行的URL
+                continue
+            }
+            
             # 跳过"🕘️更新时间","🎵音乐频道","🎮游戏频道","🏀体育频道","🌊港·澳·台","💰央视付费频道"这些特殊频道
             # 跳过"📺央视频道","📡卫视频道","☘️上海频道","☘️河南频道","🎬电影频道","🪁动画频道","🏛经典剧场"这些特殊频道
             if ($attributes -notmatch 'group-title="📺央视频道"' -and 
             $attributes -notmatch 'group-title="📡卫视频道"' -and
-            $attributes -notmatch 'group-title="☘️上海频道"' -and
-            $attributes -notmatch 'group-title="☘️河南频道"' -and
-            $attributes -notmatch 'group-title="🎬电影频道"' -and
-            $attributes -notmatch 'group-title="🏛经典剧场"' -and
-            $attributes -notmatch 'group-title="🪁动画频道"') {
+            $attributes -notmatch 'group-title="☘️上海频道"') {
                 $i++ # 跳过下一行的URL
                 continue
             }
@@ -61,6 +63,11 @@ for ($i = 0; $i -lt $content.Count; $i++) {
             $i++
             if ($i -lt $content.Count) {
                 $url = $content[$i].Trim()
+                
+                # 跳过包含 iptv.catvod.com 的链接
+                if ($url -match 'iptv\.catvod\.com') {
+                    continue
+                }
                 
                 # 只处理有效的URL行
                 if ($url -and -not $url.StartsWith('#')) {
@@ -89,14 +96,14 @@ Write-Host "已解析 $($channels.Count) 个频道"
 $output = @()
 
 # 添加M3U头部
-if ($epgUrl) {
-    $output += "#EXTM3U x-tvg-url=`"http://epg.51zmt.top:8000/e.xml`""
-} else {
-    $output += "#EXTM3U x-tvg-url=`"http://epg.51zmt.top:8000/e.xml`""
-}
+# if ($epgUrl) {
+#     $output += "#EXTM3U x-tvg-url=`"http://epg.51zmt.top:8000/e.xml`""
+# } else {
+#     $output += "#EXTM3U x-tvg-url=`"http://epg.51zmt.top:8000/e.xml`""
+# }
 
-# 生成4个线路分组
-for ($routeNum = 1; $routeNum -le 4; $routeNum++) {
+# 生成9个线路分组
+for ($routeNum = 1; $routeNum -le 9; $routeNum++) {
     $routeName = "线路$routeNum"
     Write-Host "正在生成 $routeName..."
     
